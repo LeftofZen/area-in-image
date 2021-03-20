@@ -25,10 +25,9 @@ namespace AreaFinder
 			}
 
 			img.UnlockBits(imgData);
-
 		}
 
-		Color[,] buf;
+		private Color[,] buf;
 
 		public void Clear() => buf = new Color[Height, Width];
 
@@ -73,14 +72,14 @@ namespace AreaFinder
 			Save(GetImage(), appendix);
 		}
 
-		static void Save(Image i, int appendix = 0)
+		private static void Save(Image i, int appendix = 0)
 		{
 			Console.WriteLine("Saving");
 			//i.Save(@"C:\Users\Benjamin.Sutas\source\repos\all-rgb\all-rgb\content\img.png", ImageFormat.Png);
 			i.Save(@$"{baseFileName}\img{appendix}_.png", ImageFormat.Png);
 		}
 
-		static string baseFileName = @"C:\Users\bigba\source\repos\all-rgb\all-rgb\content";
+		private static string baseFileName = @"C:\Users\bigba\source\repos\all-rgb\all-rgb\content";
 	}
 
 	// Why we need this?
