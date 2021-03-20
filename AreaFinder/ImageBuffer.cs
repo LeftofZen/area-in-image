@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -11,6 +10,7 @@ namespace AreaFinder
 		{
 			buf = new Color[height, width];
 		}
+
 		public ImageBuffer(Bitmap img) : this(img.Width, img.Height)
 		{
 			//var img = new Bitmap(Width, Height, PixelFormat.Format32bppArgb);
@@ -29,26 +29,38 @@ namespace AreaFinder
 
 		private Color[,] buf;
 
-		public void Clear() => buf = new Color[Height, Width];
+		public void Clear()
+			=> buf = new Color[Height, Width];
 
-		public bool Contains(int X, int Y) => X >= 0 && X < Width && Y >= 0 && Y < Height;
+		public bool Contains(int X, int Y)
+			=> X >= 0 && X < Width && Y >= 0 && Y < Height;
 
-		public bool Contains(Point p) => Contains(p.X, p.Y);
+		public bool Contains(Point p)
+			=> Contains(p.X, p.Y);
 
-		public Color GetPixel(Point p) => GetPixel(p.X, p.Y);
-		public Color GetPixel(int X, int Y) => buf[Y, X];
+		public Color GetPixel(Point p)
+			=> GetPixel(p.X, p.Y);
+		public Color GetPixel(int X, int Y)
+			=> buf[Y, X];
 
-		public void SetPixel(Point p, Color c) => SetPixel(p.X, p.Y, c);
-		public void SetPixel(int X, int Y, Color c) => buf[Y, X] = c;
+		public void SetPixel(Point p, Color c)
+			=> SetPixel(p.X, p.Y, c);
+		public void SetPixel(int X, int Y, Color c)
+			=> buf[Y, X] = c;
 
-		public bool IsEmpty(Point p) => GetPixel(p).IsEmpty;
+		public bool IsEmpty(Point p)
+			=> GetPixel(p).IsEmpty;
 
-		public int Width => buf.GetLength(1);
-		public int Height => buf.GetLength(0);
+		public int Width
+			=> buf.GetLength(1);
+		public int Height
+			=> buf.GetLength(0);
 
-		public int NumberOfPixels => Width * Height;
+		public int NumberOfPixels
+			=> Width * Height;
 
-		public Point Middle => new(Width / 2, Height / 2);
+		public Point Middle
+			=> new(Width / 2, Height / 2);
 
 		public Image GetImage()
 		{
@@ -68,9 +80,7 @@ namespace AreaFinder
 		}
 
 		public void Save(int appendix = 0)
-		{
-			Save(GetImage(), appendix);
-		}
+			=> Save(GetImage(), appendix);
 
 		private static void Save(Image i, int appendix = 0)
 		{
@@ -80,21 +90,5 @@ namespace AreaFinder
 		}
 
 		private static string baseFileName = @"C:\Users\bigba\source\repos\all-rgb\all-rgb\content";
-	}
-
-	// Why we need this?
-	// https://stackoverflow.com/questions/46142734/why-is-hashsetpoint-so-much-slower-than-hashsetstring
-	public class PointComparer : IEqualityComparer<Point>
-	{
-		public bool Equals(Point x, Point y)
-		{
-			return x.X == y.X && x.Y == y.Y;
-		}
-
-		public int GetHashCode(Point obj)
-		{
-			// Perfect hash for practical bitmaps, their width/height is never >= 65536
-			return (obj.Y << 16) ^ obj.X;
-		}
 	}
 }
