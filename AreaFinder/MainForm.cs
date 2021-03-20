@@ -51,17 +51,17 @@ namespace AreaFinder
 
 			lastPixelsCount = 0;
 
-			var pixelFrontier = new HashSet<Point>();
-			pixelFrontier.Add(clickedPoint);
+			var pixelQueue = new Queue<Point>();
+			pixelQueue.Enqueue(clickedPoint);
 
 			var debugImg = new ImageBuffer(originalImg.Width, originalImg.Height);
 			var bounds = new Rectangle(0, 0, originalImg.Width, originalImg.Height);
 			var rgbThreshold = tbRGBThreshold.Value;
 			var hsbThreshold = tbHSBThreshold.Value / hsbGuiMultiplier;
 
-			while (pixelFrontier.Count > 0)
+			while (pixelQueue.Count > 0)
 			{
-				var nextPixel = pixelFrontier.First();
+				var nextPixel = pixelQueue.Dequeue();
 
 				var rgbDistance = Distance(clickedPointColour, originalImg.GetPixel(nextPixel));
 				var hsbDistance = DistanceInHSB(clickedPointColour, originalImg.GetPixel(nextPixel));
@@ -76,13 +76,12 @@ namespace AreaFinder
 						{
 							if (n.X >= 0 && n.Y >= 0 && n.X < originalImg.Width && n.Y < originalImg.Height)
 							{
-								pixelFrontier.Add(n);
+								pixelQueue.Enqueue(n);
+								debugImg.SetPixel(n, Color.Blue);
 							}
 						}
 					}
 				}
-
-				pixelFrontier.Remove(nextPixel);
 			}
 
 			var pictureImage = new Bitmap(Width, Height);

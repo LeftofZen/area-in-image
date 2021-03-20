@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -80,6 +81,21 @@ namespace AreaFinder
 		}
 
 		static string baseFileName = @"C:\Users\bigba\source\repos\all-rgb\all-rgb\content";
+	}
 
+	// Why we need this?
+	// https://stackoverflow.com/questions/46142734/why-is-hashsetpoint-so-much-slower-than-hashsetstring
+	public class PointComparer : IEqualityComparer<Point>
+	{
+		public bool Equals(Point x, Point y)
+		{
+			return x.X == y.X && x.Y == y.Y;
+		}
+
+		public int GetHashCode(Point obj)
+		{
+			// Perfect hash for practical bitmaps, their width/height is never >= 65536
+			return (obj.Y << 16) ^ obj.X;
+		}
 	}
 }
