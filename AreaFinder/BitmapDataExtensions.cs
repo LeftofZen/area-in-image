@@ -25,7 +25,7 @@ namespace AreaFinder
 
 		public static unsafe Color GetPixel(this BitmapData d, int X, int Y)
 		{
-			var ptr = (byte*)d.Scan0.ToPointer() + (Y * d.Stride) + (X * (Image.GetPixelFormatSize(d.PixelFormat) / 8));
+			var ptr = GetPtrToFirstPixel(d, X, Y);
 			return Color.FromArgb(ptr[3], ptr[2], ptr[1], ptr[0]);
 		}
 
@@ -33,10 +33,10 @@ namespace AreaFinder
 			=> SetPixel(d, p.X, p.Y, c);
 
 		public static unsafe void SetPixel(this BitmapData d, int X, int Y, Color c)
-		{
-			var ptr = (byte*)d.Scan0.ToPointer() + (Y * d.Stride) + (X * (Image.GetPixelFormatSize(d.PixelFormat) / 8));
-			SetPixel(ptr, c);
-		}
+			=> SetPixel(GetPtrToFirstPixel(d, X, Y), c);
+
+		private static unsafe byte* GetPtrToFirstPixel(this BitmapData d, int X, int Y)
+			=> (byte*)d.Scan0.ToPointer() + (Y * d.Stride) + (X * (Image.GetPixelFormatSize(d.PixelFormat) / 8));
 
 		private static unsafe void SetPixel(byte* ptr, Color c)
 		{
