@@ -46,6 +46,9 @@ namespace AreaFinder
 			this.tbPixelAreaRatio = new System.Windows.Forms.TrackBar();
 			this.tbPixelAreaRatioDisplay = new System.Windows.Forms.TextBox();
 			this.label6 = new System.Windows.Forms.Label();
+			this.lbPropertiesList = new System.Windows.Forms.ListBox();
+			this.btnClearDebugImage = new System.Windows.Forms.Button();
+			this.btnClearProperties = new System.Windows.Forms.Button();
 			((System.ComponentModel.ISupportInitialize)(this.pbImage)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbRGBThreshold)).BeginInit();
 			((System.ComponentModel.ISupportInitialize)(this.tbHSBThreshold)).BeginInit();
@@ -64,11 +67,10 @@ namespace AreaFinder
 			// 
 			// pbImage
 			// 
-			this.pbImage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+			this.pbImage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
 			this.pbImage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pbImage.Location = new System.Drawing.Point(12, 165);
+			this.pbImage.Location = new System.Drawing.Point(363, 165);
 			this.pbImage.Name = "pbImage";
 			this.pbImage.Size = new System.Drawing.Size(940, 590);
 			this.pbImage.TabIndex = 1;
@@ -219,11 +221,44 @@ namespace AreaFinder
 			this.label6.TabIndex = 16;
 			this.label6.Text = "Pixel to m² Ratio";
 			// 
+			// lbPropertiesList
+			// 
+			this.lbPropertiesList.FormattingEnabled = true;
+			this.lbPropertiesList.ItemHeight = 15;
+			this.lbPropertiesList.Location = new System.Drawing.Point(12, 195);
+			this.lbPropertiesList.Name = "lbPropertiesList";
+			this.lbPropertiesList.Size = new System.Drawing.Size(345, 559);
+			this.lbPropertiesList.TabIndex = 17;
+			this.lbPropertiesList.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lbPropertiesList_KeyUp);
+			// 
+			// btnClearDebugImage
+			// 
+			this.btnClearDebugImage.Location = new System.Drawing.Point(194, 166);
+			this.btnClearDebugImage.Name = "btnClearDebugImage";
+			this.btnClearDebugImage.Size = new System.Drawing.Size(163, 23);
+			this.btnClearDebugImage.TabIndex = 18;
+			this.btnClearDebugImage.Text = "Clear Debug Rendering";
+			this.btnClearDebugImage.UseVisualStyleBackColor = true;
+			this.btnClearDebugImage.Click += new System.EventHandler(this.btnClearDebugImage_Click);
+			// 
+			// btnClearProperties
+			// 
+			this.btnClearProperties.Location = new System.Drawing.Point(12, 165);
+			this.btnClearProperties.Name = "btnClearProperties";
+			this.btnClearProperties.Size = new System.Drawing.Size(163, 23);
+			this.btnClearProperties.TabIndex = 19;
+			this.btnClearProperties.Text = "Delete All Properties";
+			this.btnClearProperties.UseVisualStyleBackColor = true;
+			this.btnClearProperties.Click += new System.EventHandler(this.btnDeleteAllProperties_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(966, 767);
+			this.ClientSize = new System.Drawing.Size(1315, 767);
+			this.Controls.Add(this.btnClearProperties);
+			this.Controls.Add(this.btnClearDebugImage);
+			this.Controls.Add(this.lbPropertiesList);
 			this.Controls.Add(this.label6);
 			this.Controls.Add(this.tbPixelAreaRatioDisplay);
 			this.Controls.Add(this.tbPixelAreaRatio);
@@ -272,6 +307,9 @@ namespace AreaFinder
 		private System.Windows.Forms.TextBox textBox1;
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.TextBox tbPixelAreaRatioDisplay;
+		private System.Windows.Forms.ListBox lbPropertiesList;
+		private System.Windows.Forms.Button btnClearDebugImage;
+		private System.Windows.Forms.Button btnClearProperties;
 	}
 }
 

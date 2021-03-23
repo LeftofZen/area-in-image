@@ -14,4 +14,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Loyc.Essentials" Version="29.0.3" />
+    <PackageReference Include="Loyc.Utilities" Version="29.0.3" />
+  </ItemGroup>
+
 </Project>
