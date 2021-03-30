@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using Loyc.Collections;
 using Loyc.Geometry;
-using Loyc.Utilities;
 
 namespace AreaFinder
 {
@@ -16,18 +14,51 @@ namespace AreaFinder
 		{
 			InitializeComponent();
 
-			Properties = new BindingList<Property>();
-			lbPropertiesList.DataSource = Properties;
+			DataSource = new UserSettings();
 
 			// default good values
-			tbRGBThreshold.Value = 1675;
-			tbHSBThreshold.Value = (int)(0.01f * hsbGuiMultiplier);
-			tbPixelAreaRatio.Value = (int)(0.1675f * pixelRatioGuiMultiplier);
+			//tbRGBThreshold.DataBindings.Add(new Binding("Value", bindingSource, "RGBThreshold"));
+			userSettings.RGBThreshold = 1675;
 
-			tbRGBThresholdDisplay.Text = tbRGBThreshold.Value.ToString();
-			tbHSBThresholdDisplay.Text = (tbHSBThreshold.Value / hsbGuiMultiplier).ToString();
-			tbPixelAreaRatioDisplay.Text = (tbPixelAreaRatio.Value / pixelRatioGuiMultiplier).ToString();
+			//tbHSBThreshold.DataBindings.Add("Value", bindingSource, "HSBThreshold");
+			userSettings.HSBThreshold = (int)(0.01f * hsbGuiMultiplier);
 
+			//tbPixelAreaRatio.DataBindings.Add("Value", bindingSource, "PixelRatio");
+			userSettings.PixelRatio = (int)(0.1675f * pixelRatioGuiMultiplier);
+
+			tbRGBThresholdDisplay.Text = userSettings.RGBThreshold.ToString();
+			tbHSBThresholdDisplay.Text = (userSettings.HSBThreshold / hsbGuiMultiplier).ToString();
+			tbPixelAreaRatioDisplay.Text = (userSettings.PixelRatio / pixelRatioGuiMultiplier).ToString();
+
+		}
+
+		public object DataSource
+		{
+			get => userSettings;
+			set
+			{
+				if (value != null)
+				{
+					userSettings = (UserSettings)value;
+					AddProperties();
+					LoadImage(userSettings.FilenameOfImage);
+					RefreshBinding();
+					Refresh();
+				}
+			}
+		}
+
+		//public string DataMember
+		//{
+		//	get => userSettings;
+		//	set => userSettings = value;
+		//}
+
+		public void RefreshBinding()
+		{
+			bindingSource.DataSource = null;
+			bindingSource.DataSource = userSettings;
+			lbPropertiesList.DataSource = userSettings.Properties;
 		}
 
 		private ImageBuffer originalImg;
@@ -36,27 +67,19 @@ namespace AreaFinder
 		private float pixelRatioGuiMultiplier = 100f;
 		private int lastPixelsCount = 0;
 
-		public BindingList<Property> Properties;
+		private UserSettings userSettings;
 
-		public struct Property
+		private void AddProperties()
 		{
-			public Point Centroid;
-			public int PixelCount;
-			public List<Point> Hull;
-
-			public Property(Point middle, int pixelCount)
+			userSettings.PropertyChanged += (a, b) =>
 			{
-				Centroid = middle;
-				PixelCount = pixelCount;
-				Hull = new List<Point>();
-			}
-
-			public string StringBinding => ToString();
-
-			public override string ToString()
-			{
-				return $"middle={Centroid} pixels={PixelCount}";
-			}
+				switch (b.PropertyName)
+				{
+					case "FilenameOfImage":
+						LoadImage(userSettings.FilenameOfImage);
+						break;
+				}
+			};
 		}
 
 		private void btnLoadImage_Click(object sender, EventArgs e)
@@ -69,9 +92,49 @@ namespace AreaFinder
 
 			if (openFileDialog.ShowDialog() == DialogResult.OK)
 			{
-				originalImg = new ImageBuffer((Bitmap)Image.FromFile(openFileDialog.FileName));
-				debugImg = new ImageBuffer(originalImg.Width, originalImg.Height);
-				pbImage.Image = originalImg.GetImage();
+				userSettings.FilenameOfImage = openFileDialog.FileName;
+			}
+		}
+
+		void LoadImage(string filename)
+		{
+			if (string.IsNullOrEmpty(filename))
+			{
+				return;
+			}
+
+			originalImg = new ImageBuffer((Bitmap)Image.FromFile(filename));
+			debugImg = new ImageBuffer(originalImg.Width, originalImg.Height);
+			pbImage.Image = originalImg.GetImage();
+		}
+
+
+		protected void tsmiSave_OnClick(object sender, EventArgs e)
+		{
+			using var saveFileDialog = new SaveFileDialog();
+			saveFileDialog.InitialDirectory = @"C:\Users\bigba\source\repos\AreaFinder\AreaFinder\content";
+			saveFileDialog.Filter = "txt files (*.txt)|*.txt";
+			saveFileDialog.FilterIndex = 1;
+			saveFileDialog.RestoreDirectory = true;
+
+			if (saveFileDialog.ShowDialog() == DialogResult.OK)
+			{
+				var filename = saveFileDialog.FileName;
+				UserSettings.Save(userSettings, filename);
+			}
+		}
+
+		protected void tsmiLoad_OnClick(object sender, EventArgs e)
+		{
+			using var loadFileDialog = new OpenFileDialog();
+			loadFileDialog.InitialDirectory = @"C:\Users\bigba\source\repos\AreaFinder\AreaFinder\content";
+			loadFileDialog.Filter = "txt files (*.txt)|*.txt";
+			loadFileDialog.FilterIndex = 1;
+			loadFileDialog.RestoreDirectory = true;
+
+			if (loadFileDialog.ShowDialog() == DialogResult.OK)
+			{
+				DataSource = UserSettings.Load(loadFileDialog.FileName);
 			}
 		}
 
@@ -149,7 +212,7 @@ namespace AreaFinder
 				prop.Hull.Add(new Point(p.X, p.Y));
 			}
 
-			Properties.Add(prop);
+			userSettings.Properties.Add(prop);
 			//lbPropertiesList.Refresh();
 
 			DrawAll();
@@ -181,7 +244,7 @@ namespace AreaFinder
 			var guiImg = new Bitmap(originalImg.Width, originalImg.Height);
 			var guiG = Graphics.FromImage(guiImg);
 			var rectWidth = 8;
-			foreach (var prop in Properties)
+			foreach (var prop in userSettings.Properties)
 			{
 				// draw hull
 				// doesn't work for battleaxe properties - need concave hull
@@ -195,7 +258,8 @@ namespace AreaFinder
 			return guiImg;
 		}
 
-		private float GetAreaRatio() => tbPixelAreaRatio.Value / pixelRatioGuiMultiplier;
+		private float GetAreaRatio()
+			=> userSettings.PixelRatio / pixelRatioGuiMultiplier;
 
 		private void UpdateAreaDisplay()
 		{
@@ -239,19 +303,22 @@ namespace AreaFinder
 			//}
 		}
 
-		private void tbThreshold_ValueChanged(object sender, EventArgs e)
+		private void tbRGBThreshold_ValueChanged(object sender, EventArgs e)
 		{
-			tbRGBThresholdDisplay.Text = tbRGBThreshold.Value.ToString();
+			userSettings.RGBThreshold = tbRGBThreshold.Value;
+			tbRGBThresholdDisplay.Text = userSettings.RGBThreshold.ToString();
 		}
 
 		private void tbHSBThreshold_ValueChanged(object sender, EventArgs e)
 		{
-			tbHSBThresholdDisplay.Text = (tbHSBThreshold.Value / hsbGuiMultiplier).ToString();
+			userSettings.HSBThreshold = tbHSBThreshold.Value;
+			tbHSBThresholdDisplay.Text = (userSettings.HSBThreshold / hsbGuiMultiplier).ToString();
 		}
 
 		private void tbPixelAreaRatio_ValueChanged(object sender, EventArgs e)
 		{
-			tbPixelAreaRatioDisplay.Text = (tbPixelAreaRatio.Value / pixelRatioGuiMultiplier).ToString();
+			userSettings.PixelRatio = tbPixelAreaRatio.Value;
+			tbPixelAreaRatioDisplay.Text = (userSettings.PixelRatio / pixelRatioGuiMultiplier).ToString();
 			UpdateAreaDisplay();
 		}
 
@@ -261,8 +328,8 @@ namespace AreaFinder
 			{
 				var item = (Property)lbPropertiesList.SelectedItem;
 				lbPropertiesList.DataSource = null;
-				Properties.Remove(item);
-				lbPropertiesList.DataSource = Properties;
+				userSettings.Properties.Remove(item);
+				lbPropertiesList.DataSource = userSettings.Properties;
 				lbPropertiesList.Refresh();
 				DrawAll();
 			}
@@ -277,50 +344,10 @@ namespace AreaFinder
 		private void btnDeleteAllProperties_Click(object sender, EventArgs e)
 		{
 			lbPropertiesList.DataSource = null;
-			Properties.Clear();
-			lbPropertiesList.DataSource = Properties;
+			userSettings.Properties.Clear();
+			lbPropertiesList.DataSource = userSettings.Properties;
 			lbPropertiesList.Refresh();
 			DrawAll();
 		}
-
-		//public static IListSource<Point> ComputeConvexHull(List<Point> points, bool sortInPlace = false)
-		//{
-		//	if (!sortInPlace)
-		//		points = new List<Point>(points);
-		//	points.Sort((a, b) =>
-		//		a.X == b.X ? a.Y.CompareTo(b.Y) : a.X.CompareTo(b.X));
-
-		//	// Importantly, DList provides O(1) insertion at beginning and end
-		//	DList<Point> hull = new DList<Point>();
-		//	int L = 0, U = 0; // size of lower and upper hulls
-
-		//	// Builds a hull such that the output polygon starts at the leftmost point.
-		//	for (int i = points.Count - 1; i >= 0; i--)
-		//	{
-		//		Point p = points[i], p1;
-
-		//		// build lower hull (at end of output list)
-		//		while (L >= 2 && (p1 = hull.Last()).Sub(hull[hull.Count - 2]).Cross(p.Sub(p1)) >= 0)
-		//		{
-		//			hull.RemoveAt(hull.Count - 1);
-		//			L--;
-		//		}
-		//		hull.PushLast(p);
-		//		L++;
-
-		//		// build upper hull (at beginning of output list)
-		//		while (U >= 2 && (p1 = hull.First()).Sub(hull[1]).Cross(p.Sub(p1)) <= 0)
-		//		{
-		//			hull.RemoveAt(0);
-		//			U--;
-		//		}
-		//		if (U != 0) // when U=0, share the point added above
-		//			hull.PushFirst(p);
-		//		U++;
-		//		//Debug.Assert(U + L == hull.Count + 1);
-		//	}
-		//	hull.RemoveAt(hull.Count - 1);
-		//	return hull;
-		//}
 	}
 }
